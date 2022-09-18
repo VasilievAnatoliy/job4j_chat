@@ -4,6 +4,7 @@ import ru.job4j.chat.model.Message;
 import ru.job4j.chat.repository.MessageRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,5 +42,11 @@ public class MessageService {
         Message message = new Message();
         message.setId(id);
         this.messages.delete(message);
+    }
+
+    public void deleteByRoomId(int id) {
+        List<Message> list = new ArrayList<>();
+        this.messages.findByRoomId(id).forEach(list::add);
+        this.messages.deleteAll(list);
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/room")
+@RequestMapping("/chat/room")
 public class RoomController {
     private final RoomService rooms;
     private final PersonService persons;
@@ -42,12 +42,6 @@ public class RoomController {
                 this.rooms.save(room),
                 HttpStatus.CREATED
         );
-    }
-
-    @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Room room) {
-        this.rooms.save(room);
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")

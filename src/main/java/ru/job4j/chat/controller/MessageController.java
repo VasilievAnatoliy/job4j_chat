@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/message")
+@RequestMapping("/chat/message")
 public class MessageController {
     private final MessageService messages;
     private final PersonService persons;
@@ -27,7 +27,7 @@ public class MessageController {
     @GetMapping("/{id}")
     public ResponseEntity<Message> findById(@PathVariable int id) {
         var message = this.messages.findById(id);
-        return new ResponseEntity<Message>(
+        return new ResponseEntity<>(
                 message.orElse(new Message()),
                 message.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
         );
@@ -66,4 +66,5 @@ public class MessageController {
         this.messages.delete(id);
         return ResponseEntity.ok().build();
     }
+
 }

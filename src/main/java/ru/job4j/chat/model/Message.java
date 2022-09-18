@@ -19,7 +19,7 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String text;
-    private LocalDateTime crated = LocalDateTime.now();
+    private LocalDateTime created = LocalDateTime.now();
     @ManyToOne
     @JoinColumn(name = "person_id")
     Person person;

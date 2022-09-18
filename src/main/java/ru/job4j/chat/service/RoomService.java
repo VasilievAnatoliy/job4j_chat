@@ -11,9 +11,11 @@ import java.util.Optional;
 @Service
 public class RoomService {
     private final RoomRepository rooms;
+    private final MessageService messages;
 
-    public RoomService(RoomRepository rooms) {
+    public RoomService(RoomRepository rooms, MessageService messages) {
         this.rooms = rooms;
+        this.messages = messages;
     }
 
     public List<Room> findAll() {
@@ -31,6 +33,7 @@ public class RoomService {
     }
 
     public void delete(int id) {
+        this.messages.deleteByRoomId(id);
         Room room = new Room();
         room.setId(id);
         this.rooms.delete(room);
