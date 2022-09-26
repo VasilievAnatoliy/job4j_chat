@@ -2,8 +2,6 @@ package ru.job4j.chat.controller;
 
 import ru.job4j.chat.model.Message;
 import ru.job4j.chat.service.MessageService;
-import ru.job4j.chat.service.PersonService;
-import ru.job4j.chat.service.RoomService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,14 +12,9 @@ import java.util.List;
 @RequestMapping("/chat/message")
 public class MessageController {
     private final MessageService messages;
-    private final PersonService persons;
-    private final RoomService rooms;
 
-
-    public MessageController(MessageService messages, PersonService persons, RoomService rooms) {
+    public MessageController(MessageService messages) {
         this.messages = messages;
-        this.persons = persons;
-        this.rooms = rooms;
     }
 
     @GetMapping("/{id}")
@@ -45,19 +38,17 @@ public class MessageController {
 
     @PostMapping("/room/{roomId}")
     public ResponseEntity<Message> create(@PathVariable int roomId,
-                                          @RequestParam("personId") int id,
                                           @RequestBody Message message) {
-        message.setRoom(rooms.findById(roomId).get());
-        message.setPerson(persons.findById(id).get());
         return new ResponseEntity<>(
-                this.messages.save(message),
+                this.messages.save(roomId, message),
                 HttpStatus.CREATED
         );
     }
 
-    @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Message message) {
-        this.messages.update(message);
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> update(@PathVariable int id,
+                                       @RequestBody Message message) {
+        this.messages.update(id, message);
         return ResponseEntity.ok().build();
     }
 

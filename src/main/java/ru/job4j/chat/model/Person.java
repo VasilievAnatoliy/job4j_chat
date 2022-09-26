@@ -1,26 +1,31 @@
 package ru.job4j.chat.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Objects;
+import java.util.*;
 
 /**
- * Модель данных - Аккаунт
+ * Модель данных - Аккаунт пользователя.
  */
-@Getter
 @Setter
+@Getter
 @Entity
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String login;
+    private String username;
     private String password;
-    @ManyToOne
-    @JoinColumn(name = "role_id")
-    Role role;
+    @ManyToMany
+    @JoinTable(name = "persons_roles", joinColumns = {
+                    @JoinColumn(name = "person_id")},
+            inverseJoinColumns = {
+                    @JoinColumn(name = "role_id")
+            })
+    private Set<Role> roles = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {

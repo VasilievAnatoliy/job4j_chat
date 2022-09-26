@@ -1,6 +1,8 @@
 package ru.job4j.chat.service;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import ru.job4j.chat.model.Person;
+import ru.job4j.chat.model.Role;
 import ru.job4j.chat.repository.PersonRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +13,12 @@ import java.util.Optional;
 public class PersonService {
     private final PersonRepository persons;
     private final RoleService roles;
+    private BCryptPasswordEncoder encoder;
 
-    public PersonService(PersonRepository persons, RoleService roles) {
+    public PersonService(PersonRepository persons, RoleService roles, BCryptPasswordEncoder encoder) {
         this.persons = persons;
         this.roles = roles;
+        this.encoder = encoder;
     }
 
     public List<Person> findAll() {
@@ -26,7 +30,8 @@ public class PersonService {
     }
 
     public Person save(Person person) {
-        person.setRole(roles.findByName("ROLE_USER"));
+        person.setPassword(encoder.encode(person.getPassword()));
+        person.getRoles().add(roles.findByName("ROLE_USER"));
         return this.persons.save(person);
     }
 
@@ -34,5 +39,21 @@ public class PersonService {
         Person person = new Person();
         person.setId(id);
         this.persons.delete(person);
+    }
+
+    public Person findByUsername(String username) {
+        return this.persons.findByUsername(username);
+    }
+
+    public void addRole(int id, Role role) {
+        Person person = findById(id).get();
+        person.getRoles().add(roles.findByName(role.getName()));
+        this.persons.save(person);
+    }
+
+    public void deleteRole(int id, Role role) {
+        Person person = findById(id).get();
+        person.getRoles().remove(roles.findByName(role.getName()));
+        this.persons.save(person);
     }
 }

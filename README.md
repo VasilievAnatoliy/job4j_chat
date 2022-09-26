@@ -7,6 +7,7 @@
 * Maven
 * Spring Boot,
 * Spring Data JPA,
+* Spring Security(jwt)
 * PostgreSQL,
 * Liquibase,
 * Checkstyle
@@ -17,36 +18,43 @@ ___
 Скачать файл, разархивировать zip файл, в application.properties(./chat-master/src/main/resources)
 указать username и password от PostgreSQL.   
 
-В проекте за счет Liquibase реализованно создание таблиц и первоначальная загрузка 
-данных(3 пользователя, 2 комнаты и пару сообщений) если данные не нужны удаляем или комментируем
-загрузку данных из "db/002_dml_init_data.sql" в liquibase-changeLog.xml(./chat-master/src/main/resources)  
+#### В проекте за счет Liquibase реализованно:   
+ - создание таблиц для Б.Д.    
+ - пользователь с правами ADMIN (login-Petr, password-123)  
+ - первоначальная загрузка данных(2 пользователя, 2 комнаты и пару сообщений) если данные не нужны удаляем или 
+комментируем загрузку данных из "db/003_dml_init_data.sql" в liquibase-changeLog.xml(./chat-master/src/main/resources)  
 
-_Запуск командой:_  
-mvn spring-boot:run
+#### Запуск командой:   
+mvn spring-boot:run  
+
 ---
+http://localhost:8080/chat//person/sign-up - _Регистрация нового пользователя(ROLE_USER)._  
+http://localhost:8080/chat/login - _Получаем токен(в Headers)_  
 Доступ http://localhost:8080/chat/  
-#### Команды:  
 
-_Пользователи:_  
-GET person/ - _Список всех пользователей._  
+_Пользователи (только для роли ADMIN) :_  
+GET person/all - _Список всех пользователей._  
 GET person/{id} - _Найти пользователя по id (где {id} идентификационный номер пользователя)._  
-POST person/ - _Создать пользователя._
-DELETE person/{id} - _Удаление пользователя по id._
+DELETE person/{id} - _Удаление пользователя по id, удалить может только ADMIN._  
+POST person/{id}/role - _Добавить роль пользователю ({id} - id пользователя)._  
+DELETE person/{id}/role - _Удалить роль пользователю ({id} - id пользователя)._    
 
-_Комнаты:_  
-GET room/ - _Список всех комнат._  
+_Комнаты :_  
+GET room/all - _Список всех комнат._  
 GET room/{id} - _Найти комнату по id (где {id} номер комнаты)._  
-POST room/ - _Создать комнату в параметрах personId id (room/?personId=1),
-в body передаём название комнаты("name": "название...")._  
-DELETE room/{id} - _Удаление комнаты по id._  
+POST room/ - _Создать комнату, в body передаём название комнаты("name": "название...")._  
+DELETE room/{id} - _Удаление комнаты по id, удалить может только ADMIN._  
 
-_Сообщения:_
+_Сообщения :_  
 GET /message/{id} - _Найти сообщение по id._  
 GET /message/room/{id} - _Список всех сообщений в комнате(указываем id комнаты в {id})._  
 GET /message/person/{personId} - _Список всех сообщений пользователя(указываем id пользователя в {personId})._  
-POST /message/room/{roomId} - _Создать сообщение в указанной комнате {roomId}, в параметрах передаём "personId" id,
-в body ("text": "сообщение...")._  
-DELETE /message/{id} - _Удаление сообщения по id._
+POST /message/room/{roomId} - _Создать сообщение в указанной комнате {roomId},
+передаём в body ("text": "сообщение...")._   
+PUT /message/{id} - _Редактирование текста сообщения, возможно только для автора сообщения,
+в body ("text": "сообщение...").._   
+DELETE /message/{id} - _Удаление сообщения по id, удалить может только автор сообщения или ADMIN._   
+
 
 
 

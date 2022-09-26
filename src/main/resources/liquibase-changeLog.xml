@@ -8,5 +8,6 @@
     http://www.liquibase.org/xml/ns/dbchangelog-ext
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
     <include file="db/001_ddl_init_schema.sql" relativeToChangelogFile="true"/>
-    <include file="db/002_dml_init_data.sql" relativeToChangelogFile="true"/>
+    <include file="db/002_dml_init_admin.sql" relativeToChangelogFile="true"/>
+    <include file="db/003_dml_init_data.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>

@@ -2,7 +2,6 @@ package ru.job4j.chat.controller;
 
 import ru.job4j.chat.service.RoomService;
 import ru.job4j.chat.model.Room;
-import ru.job4j.chat.service.PersonService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,14 +12,12 @@ import java.util.List;
 @RequestMapping("/chat/room")
 public class RoomController {
     private final RoomService rooms;
-    private final PersonService persons;
 
-    public RoomController(RoomService rooms, PersonService persons) {
+    public RoomController(RoomService rooms) {
         this.rooms = rooms;
-        this.persons = persons;
     }
 
-    @GetMapping("/")
+    @GetMapping("/all")
     public List<Room> findAll() {
         return this.rooms.findAll();
     }
@@ -35,9 +32,7 @@ public class RoomController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Room> create(@RequestParam("personId") int id,
-                                       @RequestBody Room room) {
-        room.setPerson(persons.findById(id).get());
+    public ResponseEntity<Room> create(@RequestBody Room room) {
         return new ResponseEntity<>(
                 this.rooms.save(room),
                 HttpStatus.CREATED

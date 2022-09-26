@@ -1,6 +1,7 @@
 package ru.job4j.chat.controller;
 
 import ru.job4j.chat.model.Person;
+import ru.job4j.chat.model.Role;
 import ru.job4j.chat.service.PersonService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class PersonController {
         this.persons = persons;
     }
 
-    @GetMapping("/")
+    @GetMapping("/all")
     public List<Person> findAll() {
         return this.persons.findAll();
     }
@@ -31,7 +32,7 @@ public class PersonController {
         );
     }
 
-    @PostMapping("/")
+    @PostMapping("/sign-up")
     public ResponseEntity<Person> create(@RequestBody Person person) {
         return new ResponseEntity<>(
                 this.persons.save(person),
@@ -48,6 +49,20 @@ public class PersonController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
         this.persons.delete(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/role")
+    public ResponseEntity<Person> addRole(@PathVariable int id,
+                                          @RequestBody Role role) {
+        this.persons.addRole(id, role);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}/role")
+    public ResponseEntity<Person> deleteRole(@PathVariable int id,
+                                             @RequestBody Role role) {
+        this.persons.deleteRole(id, role);
         return ResponseEntity.ok().build();
     }
 }
