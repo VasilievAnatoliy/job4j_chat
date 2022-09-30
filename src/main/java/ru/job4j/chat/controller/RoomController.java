@@ -1,12 +1,15 @@
 package ru.job4j.chat.controller;
 
+import org.springframework.util.MultiValueMapAdapter;
 import ru.job4j.chat.service.RoomService;
 import ru.job4j.chat.model.Room;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/chat/room")
@@ -39,7 +42,13 @@ public class RoomController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
+        String room = this.rooms.findById(id).getName();
         this.rooms.delete(id);
-        return ResponseEntity.ok().build();
+        var entity = new ResponseEntity(
+                new HashMap<>() { { put("Room deleted ", room); } },
+                new MultiValueMapAdapter<>(Map.of("Room deleted", List.of(room))),
+                HttpStatus.OK
+        );
+        return entity;
     }
 }
