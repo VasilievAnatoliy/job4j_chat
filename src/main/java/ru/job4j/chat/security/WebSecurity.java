@@ -36,6 +36,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable().authorizeRequests()
                 .antMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
                 .antMatchers("/chat/person/**").hasAnyAuthority("ROLE_ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/chat/room/**").hasAnyAuthority("ROLE_ADMIN")
                 .antMatchers("/chat/message/**", "/chat/room/**").authenticated()
                 .anyRequest().authenticated()
                 .and()

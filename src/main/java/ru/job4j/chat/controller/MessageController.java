@@ -19,11 +19,9 @@ public class MessageController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Message> findById(@PathVariable int id) {
-        var message = this.messages.findById(id);
         return new ResponseEntity<>(
-                message.orElse(new Message()),
-                message.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
-        );
+                this.messages.findById(id),
+                HttpStatus.OK);
     }
 
     @GetMapping("/room/{roomId}")

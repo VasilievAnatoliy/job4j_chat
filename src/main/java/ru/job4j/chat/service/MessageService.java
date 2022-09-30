@@ -1,66 +1,77 @@
 package ru.job4j.chat.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.model.Message;
 import ru.job4j.chat.model.Person;
+import ru.job4j.chat.model.Room;
 import ru.job4j.chat.repository.MessageRepository;
 import org.springframework.stereotype.Service;
-import ru.job4j.chat.repository.PersonRepository;
 import ru.job4j.chat.repository.RoomRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MessageService {
     private final MessageRepository messages;
-    private final PersonRepository persons;
+    private final PersonService persons;
     private final RoomRepository rooms;
 
-    public MessageService(MessageRepository messages, PersonRepository persons, RoomRepository rooms) {
+    public MessageService(MessageRepository messages, PersonService persons,
+                          RoomRepository rooms) {
         this.messages = messages;
         this.persons = persons;
         this.rooms = rooms;
     }
 
-    public Optional<Message> findById(int id) {
-        return messages.findById(id);
+    public Message findById(int id) {
+        return validateMessageId(id);
     }
 
     public List<Message> findByRoomId(int id) {
+        validateRoomId(id);
         return this.messages.findByRoomId(id);
     }
 
     public List<Message> findByPersonId(int id) {
+        validatePersonId(id);
         return this.messages.findByPersonId(id);
     }
 
     public Message save(int roomId, Message message) {
-        message.setRoom(rooms.findById(roomId).get());
+        validateMessage(message);
+        message.setRoom(validateRoomId(roomId));
         message.setPerson(persons.findByUsername(authentication().getName()));
         return messages.save(message);
     }
 
     public void update(int id, Message message) {
         Person person = persons.findByUsername(authentication().getName());
-        Message newMessage = findById(id).get();
-        if (person.getId() == newMessage.getPerson().getId()) {
-            newMessage.setText(message.getText());
-            this.messages.save(newMessage);
+        Message newMessage = findById(id);
+        if (person.getId() != newMessage.getPerson().getId()) {
+            throw new ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED,
+                    "only author can update message");
         }
+        validateMessage(message);
+        newMessage.setText(message.getText());
+        this.messages.save(newMessage);
     }
 
     public void delete(int id) {
-        Person author = findById(id).get().getPerson();
+        Person author = findById(id).getPerson();
         Person person = persons.findByUsername(authentication().getName());
         if (person.getId() == author.getId()
-                || authentication().getAuthorities().contains("ROLE_ADMIN")) {
+                || personRoles().contains("ROLE_ADMIN")) {
             Message message = new Message();
             message.setId(id);
             this.messages.delete(message);
+            return;
         }
+        throw new ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED,
+                "only author or ADMIN can delete message");
     }
 
     public void deleteByRoomId(int id) {
@@ -72,4 +83,38 @@ public class MessageService {
     private Authentication authentication() {
         return SecurityContextHolder.getContext().getAuthentication();
     }
+
+    private List<String> personRoles() {
+        List authorities = new ArrayList<>();
+        authentication().getAuthorities().stream().forEach(role ->
+                authorities.add(String.valueOf(role)));
+        return authorities;
+    }
+
+    private void validateMessage(Message message) {
+        if (message.getText() == null) {
+            throw new NullPointerException("message can't be empty");
+        }
+    }
+
+    private Message validateMessageId(int id) {
+        Message message = this.messages.findById(id).orElse(null);
+        if (message == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
+        }
+        return message;
+    }
+
+    private Room validateRoomId(int id) {
+        Room roomId = this.rooms.findById(id).orElse(null);
+        if (roomId == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Room not found");
+        }
+        return roomId;
+    }
+
+    private void validatePersonId(int id) {
+        this.persons.findById(id);
+    }
 }
+

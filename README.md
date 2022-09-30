@@ -35,9 +35,8 @@ http://localhost:8080/chat/login - _Получаем токен(в Headers)_
 _Пользователи (только для роли ADMIN) :_  
 GET person/all - _Список всех пользователей._  
 GET person/{id} - _Найти пользователя по id (где {id} идентификационный номер пользователя)._  
-DELETE person/{id} - _Удаление пользователя по id, удалить может только ADMIN._  
-POST person/{id}/role - _Добавить роль пользователю ({id} - id пользователя)._  
-DELETE person/{id}/role - _Удалить роль пользователю ({id} - id пользователя)._    
+POST person/{id}/role - _Добавить роль пользователю ({id} - id пользователя), в body передаём("name": "ROLE_ADMIN")._  
+DELETE person/{id}/role - _Удалить роль пользователю ({id} - id пользователя), в body передаём("name": "ROLE_ADMIN")._    
 
 _Комнаты :_  
 GET room/all - _Список всех комнат._  

@@ -1,14 +1,16 @@
 package ru.job4j.chat.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.model.Room;
 import ru.job4j.chat.repository.RoomRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class RoomService {
@@ -28,25 +30,35 @@ public class RoomService {
         return list;
     }
 
-    public Optional<Room> findById(int id) {
-        return this.rooms.findById(id);
+    public Room findById(int id) {
+        return validateRoomId(id);
     }
 
     public Room save(Room room) {
+        if (room.getName() == null) {
+            throw new NullPointerException("Room name mustn't be empty");
+        }
         room.setPerson(persons.findByUsername(authentication().getName()));
         return this.rooms.save(room);
     }
 
     public void delete(int id) {
-        if (authentication().getAuthorities().contains("ROLE_ADMIN")) {
+            validateRoomId(id);
             this.messages.deleteByRoomId(id);
             Room room = new Room();
             room.setId(id);
             this.rooms.delete(room);
-        }
     }
 
     private Authentication authentication() {
         return SecurityContextHolder.getContext().getAuthentication();
+    }
+
+    private Room validateRoomId(int id) {
+        Room roomId = this.rooms.findById(id).orElse(null);
+        if (roomId == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Room not found");
+        }
+        return roomId;
     }
 }

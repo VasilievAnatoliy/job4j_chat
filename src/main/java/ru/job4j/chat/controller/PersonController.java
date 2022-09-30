@@ -1,5 +1,8 @@
 package ru.job4j.chat.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.job4j.chat.model.Person;
 import ru.job4j.chat.model.Role;
 import ru.job4j.chat.service.PersonService;
@@ -7,6 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -14,8 +21,12 @@ import java.util.List;
 public class PersonController {
     private final PersonService persons;
 
-    public PersonController(PersonService persons) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersonService.class.getSimpleName());
+    private final ObjectMapper objectMapper;
+
+    public PersonController(PersonService persons, ObjectMapper objectMapper) {
         this.persons = persons;
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping("/all")
@@ -25,15 +36,21 @@ public class PersonController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Person> findById(@PathVariable int id) {
-        var person = this.persons.findById(id);
         return new ResponseEntity<>(
-                person.orElse(new Person()),
-                person.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
-        );
+                this.persons.findById(id),
+                HttpStatus.OK);
     }
 
     @PostMapping("/sign-up")
     public ResponseEntity<Person> create(@RequestBody Person person) {
+        String password = person.getPassword();
+        if (person.getUsername() == null || password == null) {
+            throw new NullPointerException("Username and password mustn't be empty");
+        }
+        if (password.length() < 3) {
+            throw new IllegalArgumentException(
+                    "Invalid password. Password length must be more than 3 characters");
+        }
         return new ResponseEntity<>(
                 this.persons.save(person),
                 HttpStatus.CREATED
@@ -43,12 +60,6 @@ public class PersonController {
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Person person) {
         this.persons.save(person);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable int id) {
-        this.persons.delete(id);
         return ResponseEntity.ok().build();
     }
 
@@ -64,5 +75,17 @@ public class PersonController {
                                              @RequestBody Role role) {
         this.persons.deleteRole(id, role);
         return ResponseEntity.ok().build();
+    }
+
+    @ExceptionHandler(value = { IllegalArgumentException.class })
+    public void exceptionHandler(Exception e, HttpServletRequest request,
+                                 HttpServletResponse response) throws IOException {
+        response.setStatus(HttpStatus.LENGTH_REQUIRED.value());
+        response.setContentType("application/json");
+        response.getWriter().write(objectMapper.writeValueAsString(new HashMap<>() { {
+            put("message", e.getMessage());
+            put("type", e.getClass());
+        }}));
+        LOGGER.error(e.getLocalizedMessage());
     }
 }

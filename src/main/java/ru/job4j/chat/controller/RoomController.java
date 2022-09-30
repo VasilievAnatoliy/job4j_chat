@@ -24,11 +24,9 @@ public class RoomController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Room> findById(@PathVariable int id) {
-        var person = this.rooms.findById(id);
         return new ResponseEntity<>(
-                person.orElse(new Room()),
-                person.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
-        );
+                this.rooms.findById(id),
+                HttpStatus.OK);
     }
 
     @PostMapping("/")
