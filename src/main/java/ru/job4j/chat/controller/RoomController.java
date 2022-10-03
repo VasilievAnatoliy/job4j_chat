@@ -1,6 +1,7 @@
 package ru.job4j.chat.controller;
 
 import org.springframework.util.MultiValueMapAdapter;
+import ru.job4j.chat.dto.RoomDTO;
 import ru.job4j.chat.service.RoomService;
 import ru.job4j.chat.model.Room;
 import org.springframework.http.HttpStatus;
@@ -21,14 +22,14 @@ public class RoomController {
     }
 
     @GetMapping("/all")
-    public List<Room> findAll() {
+    public List<RoomDTO> findAll() {
         return this.rooms.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Room> findById(@PathVariable int id) {
+    public ResponseEntity<RoomDTO> findById(@PathVariable int id) {
         return new ResponseEntity<>(
-                this.rooms.findById(id),
+                this.rooms.findByIdRoomDTO(id),
                 HttpStatus.OK);
     }
 

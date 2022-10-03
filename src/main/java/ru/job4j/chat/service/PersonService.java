@@ -1,9 +1,8 @@
 package ru.job4j.chat.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.model.Person;
@@ -19,16 +18,11 @@ public class PersonService {
     private final RoleService roles;
     private BCryptPasswordEncoder encoder;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PersonService.class.getSimpleName());
-    private final ObjectMapper objectMapper;
-
-
     public PersonService(PersonRepository persons, RoleService roles,
-                         BCryptPasswordEncoder encoder, ObjectMapper objectMapper) {
+                         BCryptPasswordEncoder encoder) {
         this.persons = persons;
         this.roles = roles;
         this.encoder = encoder;
-        this.objectMapper = objectMapper;
     }
 
     public List<Person> findAll() {
@@ -44,9 +38,26 @@ public class PersonService {
     }
 
     public Person save(Person person) {
+        Person newPerson = persons.findByUsername(person.getUsername());
+        if (newPerson != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    String.format("User with name: %s already exists", person.getUsername()));
+        }
         person.setPassword(encoder.encode(person.getPassword()));
         person.getRoles().add(roles.findByName("ROLE_USER"));
         return this.persons.save(person);
+    }
+
+
+    public void update(Person person) {
+        Person savedPerson = findByUsername(authentication().getName());
+        if (person.getUsername() != null) {
+            savedPerson.setUsername(person.getUsername());
+        }
+        if (person.getPassword() != null) {
+            savedPerson.setPassword(person.getPassword());
+        }
+        save(savedPerson);
     }
 
     public Person findByUsername(String username) {
@@ -67,5 +78,9 @@ public class PersonService {
         Person person = findById(id);
         person.getRoles().remove(roles.findByName(role.getName()));
         this.persons.save(person);
+    }
+
+    private Authentication authentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 }

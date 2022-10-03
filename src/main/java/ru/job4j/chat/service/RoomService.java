@@ -4,12 +4,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
+import ru.job4j.chat.dto.RoomDTO;
 import ru.job4j.chat.model.Room;
 import ru.job4j.chat.repository.RoomRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static ru.job4j.chat.dto.RoomDTO.dtoFromRoom;
 
 
 @Service
@@ -24,14 +27,18 @@ public class RoomService {
         this.persons = persons;
     }
 
-    public List<Room> findAll() {
-        List<Room> list = new ArrayList<>();
-        this.rooms.findAll().forEach(list::add);
-        return list;
+    public List<RoomDTO> findAll() {
+        return this.rooms.findAll().stream()
+                .map(room -> dtoFromRoom(room))
+                .collect(Collectors.toList());
     }
 
     public Room findById(int id) {
         return validateRoomId(id);
+    }
+
+    public RoomDTO findByIdRoomDTO(int id) {
+        return dtoFromRoom(findById(id));
     }
 
     public Room save(Room room) {

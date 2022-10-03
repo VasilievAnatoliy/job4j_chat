@@ -28,11 +28,17 @@ ___
 mvn spring-boot:run  
 
 ---
-http://localhost:8080/chat//person/sign-up - _Регистрация нового пользователя(ROLE_USER)._  
+http://localhost:8080/chat/person/sign-up - _Регистрация нового пользователя(ROLE_USER),
+в body {"username": "userLogin", "password": "userPassword"}, password не менее 3 символов._  
 http://localhost:8080/chat/login - _Получаем токен(в Headers)_  
 Доступ http://localhost:8080/chat/  
 
-_Пользователи (только для роли ADMIN) :_  
+_Пользователи:_  
+PATCH person/ - _Изменение регистрационных данных пользователя в body {"username": "newLogin"} или
+{"password": "newPassword"} или {"username": "newLogin", "password": "newPassword"}._  
+_После изменения данных необходимо получить новый Токен._  
+
+_только для роли ADMIN :_  
 GET person/all - _Список всех пользователей._  
 GET person/{id} - _Найти пользователя по id (где {id} идентификационный номер пользователя)._  
 POST person/{id}/role - _Добавить роль пользователю ({id} - id пользователя), в body передаём("name": "ROLE_ADMIN")._  

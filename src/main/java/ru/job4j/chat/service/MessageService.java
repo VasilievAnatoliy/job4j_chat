@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
+import ru.job4j.chat.dto.MessageDTO;
 import ru.job4j.chat.model.Message;
 import ru.job4j.chat.model.Person;
 import ru.job4j.chat.model.Room;
@@ -13,6 +14,9 @@ import ru.job4j.chat.repository.RoomRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static ru.job4j.chat.dto.MessageDTO.dtoFromMessage;
 
 @Service
 public class MessageService {
@@ -31,14 +35,22 @@ public class MessageService {
         return validateMessageId(id);
     }
 
-    public List<Message> findByRoomId(int id) {
-        validateRoomId(id);
-        return this.messages.findByRoomId(id);
+    public MessageDTO findByIdMessageDTO(int id) {
+        return dtoFromMessage(findById(id));
     }
 
-    public List<Message> findByPersonId(int id) {
+    public List<MessageDTO> findByRoomId(int id) {
+        validateRoomId(id);
+        return this.messages.findByRoomId(id).stream()
+                .map(message -> dtoFromMessage(message))
+                .collect(Collectors.toList());
+    }
+
+    public List<MessageDTO> findByPersonId(int id) {
         validatePersonId(id);
-        return this.messages.findByPersonId(id);
+        return this.messages.findByPersonId(id).stream()
+                .map(message -> dtoFromMessage(message))
+                .collect(Collectors.toList());
     }
 
     public Message save(int roomId, Message message) {

@@ -1,5 +1,6 @@
 package ru.job4j.chat.controller;
 
+import ru.job4j.chat.dto.MessageDTO;
 import ru.job4j.chat.model.Message;
 import ru.job4j.chat.service.MessageService;
 import org.springframework.http.HttpStatus;
@@ -18,19 +19,19 @@ public class MessageController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Message> findById(@PathVariable int id) {
+    public ResponseEntity<MessageDTO> findById(@PathVariable int id) {
         return new ResponseEntity<>(
-                this.messages.findById(id),
+                this.messages.findByIdMessageDTO(id),
                 HttpStatus.OK);
     }
 
     @GetMapping("/room/{roomId}")
-    public List<Message> findByRoomId(@PathVariable int roomId) {
+    public List<MessageDTO> findByRoomId(@PathVariable int roomId) {
         return this.messages.findByRoomId(roomId);
     }
 
     @GetMapping("/person/{personId}")
-    public List<Message> findByPersonId(@PathVariable int personId) {
+    public List<MessageDTO> findByPersonId(@PathVariable int personId) {
         return this.messages.findByPersonId(personId);
     }
 

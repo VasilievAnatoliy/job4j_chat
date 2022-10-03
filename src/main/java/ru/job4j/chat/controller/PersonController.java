@@ -42,7 +42,7 @@ public class PersonController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<Person> create(@RequestBody Person person) {
+    public ResponseEntity create(@RequestBody Person person) {
         String password = person.getPassword();
         if (person.getUsername() == null || password == null) {
             throw new NullPointerException("Username and password mustn't be empty");
@@ -51,15 +51,15 @@ public class PersonController {
             throw new IllegalArgumentException(
                     "Invalid password. Password length must be more than 3 characters");
         }
+        this.persons.save(person);
         return new ResponseEntity<>(
-                this.persons.save(person),
                 HttpStatus.CREATED
         );
     }
 
-    @PutMapping("/")
+    @PatchMapping("/")
     public ResponseEntity<Void> update(@RequestBody Person person) {
-        this.persons.save(person);
+        this.persons.update(person);
         return ResponseEntity.ok().build();
     }
 
